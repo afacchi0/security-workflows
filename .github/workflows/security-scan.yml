@@ -1,0 +1,67 @@
+name: Reusable Security Scan
+
+on:
+  workflow_call:
+    inputs:
+      languages:
+        description: 'JSON array of CodeQL languages, e.g. ["go","python","rust"]'
+        required: false
+        default: '["go","python","rust"]'
+        type: string
+      run_codeql:
+        required: false
+        default: true
+        type: boolean
+      run_tfsec:
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  codeql:
+    if: ${{ inputs.run_codeql }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ${{ fromJSON(inputs.languages) }}
+
+    steps:
+      - name: Checkout caller repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+
+      # If autobuild fails in your repo, replace with explicit build steps.
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@v3
+
+  tfsec:
+    if: ${{ inputs.run_tfsec }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout caller repo
+        uses: actions/checkout@v4
+
+      - name: Run tfsec (SARIF)
+        uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          format: sarif
+          sarif_file: tfsec.sarif
+
+      - name: Upload SARIF to GitHub code scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: tfsec.sarif
