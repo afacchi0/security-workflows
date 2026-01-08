@@ -41,7 +41,7 @@ jobs:
         with:
           languages: ${{ matrix.language }}
 
-      # If autobuild fails in your repo, replace with explicit build steps.
+      # If autobuild fails in the repo, replace with explicit build steps.
       - name: Autobuild
         uses: github/codeql-action/autobuild@v3
 
@@ -59,7 +59,7 @@ jobs:
         uses: aquasecurity/tfsec-action@v1.0.3
         with:
           format: sarif
-          sarif_file: tfsec.sarif
+          additional_args: --out tfsec.sarif
 
       - name: Upload SARIF to GitHub code scanning
         uses: github/codeql-action/upload-sarif@v3
