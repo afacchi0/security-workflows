@@ -12,7 +12,7 @@ on:
         required: false
         default: true
         type: boolean
-      run_trivy:
+      run_trivy_code:
         required: false
         default: true
         type: boolean
