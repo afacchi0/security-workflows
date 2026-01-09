@@ -12,7 +12,7 @@ on:
         required: false
         default: true
         type: boolean
-      run_tfsec:
+      run_trivy:
         required: false
         default: true
         type: boolean
@@ -48,20 +48,24 @@ jobs:
       - name: Analyze
         uses: github/codeql-action/analyze@v4
 
-  tfsec:
-    if: ${{ inputs.run_tfsec }}
+  trivy:
+    if: ${{ inputs.run_trivy }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout caller repo
         uses: actions/checkout@v4
 
-      - name: Run tfsec (SARIF)
-        uses: aquasecurity/tfsec-action@v1.0.3
+      - name: Run Trivy (SARIF)
+        uses: aquasecurity/trivy-action@0.24.0
         with:
+          scan-type: fs
+          security-checks: vuln,config,secret
           format: sarif
-          additional_args: --out tfsec.sarif
+          output: trivy.sarif
+          severity: CRITICAL,HIGH,MEDIUM,LOW
+          vuln-type: os,library
 
       - name: Upload SARIF to GitHub code scanning
         uses: github/codeql-action/upload-sarif@v4
         with:
-          sarif_file: tfsec.sarif
+          sarif_file: trivy.sarif
