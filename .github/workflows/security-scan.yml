@@ -57,7 +57,7 @@ jobs:
       - name: Analyze
         uses: github/codeql-action/analyze@v4
 
-  trivy:
+  trivy_code:
     if: ${{ inputs.run_trivy }}
     runs-on: ubuntu-latest
     steps:
@@ -67,6 +67,7 @@ jobs:
       - name: Run Trivy (SARIF)
         uses: aquasecurity/trivy-action@0.33.1
         with:
+          version: latest
           scan-type: fs
           scanners: vuln,config,secret
           format: sarif
@@ -86,6 +87,7 @@ jobs:
       - name: Run Trivy image scan (SARIF)
         uses: aquasecurity/trivy-action@0.33.1
         with:
+          version: latest
           scan-type: image
           image-ref: ${{ inputs.image_ref }}
           scanners: vuln
